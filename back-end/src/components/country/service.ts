@@ -1,48 +1,48 @@
+import { IAddCountry } from "./dto/addCountry";
 import CountryModel from "./model";
+import * as mysql2 from "mysql2/promise";
 
 class CountryService {
+  constructor(private db: mysql2.Connection) {}
+
+  protected async adaptModel(row: any): Promise<CountryModel> {
+    const item: CountryModel = new CountryModel();
+
+    item.country_id = +row?.country_id;
+    item.name = row?.name;
+
+    return item;
+  }
   public async getAll(): Promise<CountryModel[]> {
     const lista: CountryModel[] = [];
 
-    lista.push({
-      country_id: 1,
-      name: "Serbia",
-    });
-    lista.push({
-      country_id: 2,
-      name: "Croatia",
-    });
-    lista.push({
-      country_id: 3,
-      name: "Slovenia",
-    });
+    const sql: string = "SELECT * FROM country;";
+    const [rows, columns] = await this.db.execute(sql);
+
+    if (Array.isArray(rows)) {
+      for (let row of rows) {
+        lista.push(await this.adaptModel(row));
+      }
+    }
 
     return lista;
   }
   public async getById(countryId: number): Promise<CountryModel> | null {
-    if (countryId === 1 || countryId === 2 || countryId === 3) {
-      if (countryId === 1) {
-        return {
-          country_id: 1,
-          name: "Serbia",
-        };
-      }
-      if (countryId === 2) {
-        return {
-          country_id: 2,
-          name: "Croatia",
-        };
-      }
-      if (countryId === 3) {
-        return {
-          country_id: 3,
-          name: "Slovenia",
-        };
-      }
-    } else {
+    const sql: string = "SELECT * FROM country WHERE country_id = ?;";
+    const [rows, columns] = await this.db.execute(sql, [countryId]);
+    let country: CountryModel = new CountryModel();
+
+    if (!Array.isArray(rows)) {
       return null;
     }
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return await this.adaptModel(rows[0]);
   }
+
+  //public async add(data: IAddCountry): Promise<CountryModel | null> {}
 }
 
 export default CountryService;
