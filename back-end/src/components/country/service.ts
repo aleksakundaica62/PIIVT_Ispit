@@ -1,6 +1,6 @@
-import { IAddCountry } from "./dto/addCountry";
 import CountryModel from "./model";
 import * as mysql2 from "mysql2/promise";
+import IErrorResponse from "../../common/IErrorResponse.interface";
 
 class CountryService {
   constructor(private db: mysql2.Connection) {}
@@ -13,19 +13,29 @@ class CountryService {
 
     return item;
   }
-  public async getAll(): Promise<CountryModel[]> {
-    const lista: CountryModel[] = [];
+  public async getAll(): Promise<CountryModel[] | IErrorResponse> {
+    return new Promise<CountryModel[] | IErrorResponse>(async (resolve) => {
+      const sql: string = "SELECT * FROM country;";
+      this.db
+        .execute(sql)
+        .then(async (result) => {
+          const rows = result[0];
+          const lista: CountryModel[] = [];
 
-    const sql: string = "SELECT * FROM country;";
-    const [rows, columns] = await this.db.execute(sql);
-
-    if (Array.isArray(rows)) {
-      for (let row of rows) {
-        lista.push(await this.adaptModel(row));
-      }
-    }
-
-    return lista;
+          if (Array.isArray(rows)) {
+            for (let row of rows) {
+              lista.push(await this.adaptModel(row));
+            }
+          }
+          resolve(lista);
+        })
+        .catch((error) => {
+          resolve({
+            errorCode: error?.errno,
+            errorMessage: error?.sqlMessage,
+          });
+        });
+    });
   }
   public async getById(countryId: number): Promise<CountryModel> | null {
     const sql: string = "SELECT * FROM country WHERE country_id = ?;";

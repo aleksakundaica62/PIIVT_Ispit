@@ -2,9 +2,11 @@ import * as express from "express";
 import CountryContreller from "./controller";
 import CountryService from "./service";
 import IApplicationResources from "../../common/IApplicationResources.interface";
+import IRoutrer from "../../common/IRouter.interface";
+import IRouter from "../../common/IRouter.interface";
 
-export default class CountryRouter {
-  public static setupRoutes(
+export default class CountryRouter implements IRouter {
+  public setupRoutes(
     app: express.Application,
     resources: IApplicationResources
   ) {
