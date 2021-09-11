@@ -1,9 +1,7 @@
 import * as express from "express";
 import * as cors from "cors";
 import Config from "./config/dev";
-import IConfig from "./config/IConfig.interface";
-import CountryService from "./components/country/service";
-import CountryContreller from "./components/country/controler";
+import CountryRouter from "./components/country/rounter";
 
 const application: express.Application = express();
 
@@ -20,16 +18,8 @@ application.use(
     dotfiles: Config.server.static.dotifles,
   })
 );
-const countryService: CountryService = new CountryService();
-const countryController: CountryContreller = new CountryContreller(
-  countryService
-);
 
-application.get("/country", countryController.getAll.bind(countryController));
-application.get(
-  "/country/:id",
-  countryController.getById.bind(countryController)
-);
+CountryRouter.setupRoutes(application);
 
 application.use((req, res) => {
   res.sendStatus(404);
