@@ -1,6 +1,7 @@
 import CountryModel from "./model";
 import * as mysql2 from "mysql2/promise";
 import IErrorResponse from "../../common/IErrorResponse.interface";
+import { IAddCountry } from "./dto/AddCountry";
 
 class CountryService {
   constructor(private db: mysql2.Connection) {}
@@ -52,7 +53,26 @@ class CountryService {
     return await this.adaptModel(rows[0]);
   }
 
-  //public async add(data: IAddCountry): Promise<CountryModel | null> {}
+  public async add(data: IAddCountry): Promise<CountryModel | IErrorResponse> {
+    return new Promise<CountryModel | IErrorResponse>(async (resolve) => {
+      const sql = "INSERT country SET name = ?";
+      this.db
+        .execute(sql, [data.name ?? null])
+        .then(async (result) => {
+          const [info]: any = result;
+
+          const newCountryId: number = +info?.insertId;
+
+          resolve(await this.getById(newCountryId));
+        })
+        .catch((error) => {
+          resolve({
+            errorCode: error?.errno,
+            errorMessage: error?.sqlMessage,
+          });
+        });
+    });
+  }
 }
 
 export default CountryService;

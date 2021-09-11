@@ -18,5 +18,6 @@ export default class CountryRouter implements IRouter {
     );
     app.get("/country", countryController.getAll.bind(countryController));
     app.get("/country/:id", countryController.getById.bind(countryController));
+    app.post("/country", countryController.add.bind(countryController));
   }
 }
