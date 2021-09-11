@@ -2,10 +2,9 @@ import CountryModel from "./model";
 import * as mysql2 from "mysql2/promise";
 import IErrorResponse from "../../common/IErrorResponse.interface";
 import { IAddCountry } from "./dto/AddCountry";
+import BaseService from "../../services/BaseService";
 
-class CountryService {
-  constructor(private db: mysql2.Connection) {}
-
+class CountryService extends BaseService<CountryModel> {
   protected async adaptModel(row: any): Promise<CountryModel> {
     const item: CountryModel = new CountryModel();
 
@@ -15,42 +14,24 @@ class CountryService {
     return item;
   }
   public async getAll(): Promise<CountryModel[] | IErrorResponse> {
-    return new Promise<CountryModel[] | IErrorResponse>(async (resolve) => {
-      const sql: string = "SELECT * FROM country;";
-      this.db
-        .execute(sql)
-        .then(async (result) => {
-          const rows = result[0];
-          const lista: CountryModel[] = [];
-
-          if (Array.isArray(rows)) {
-            for (let row of rows) {
-              lista.push(await this.adaptModel(row));
-            }
-          }
-          resolve(lista);
-        })
-        .catch((error) => {
-          resolve({
-            errorCode: error?.errno,
-            errorMessage: error?.sqlMessage,
-          });
-        });
-    });
+    return await this.getAllFromTable("country");
   }
-  public async getById(countryId: number): Promise<CountryModel> | null {
-    const sql: string = "SELECT * FROM country WHERE country_id = ?;";
-    const [rows, columns] = await this.db.execute(sql, [countryId]);
-    let country: CountryModel = new CountryModel();
+  public async getById(
+    countryId: number
+  ): Promise<CountryModel | IErrorResponse | null> {
+    // const sql: string = "SELECT * FROM country WHERE country_id = ?;";
+    // const [rows, columns] = await this.db.execute(sql, [countryId]);
 
-    if (!Array.isArray(rows)) {
-      return null;
-    }
-    if (rows.length === 0) {
-      return null;
-    }
+    // if (!Array.isArray(rows)) {
+    //   return null;
+    // }
+    // if (rows.length === 0) {
+    //   return null;
+    // }
 
-    return await this.adaptModel(rows[0]);
+    // return await this.adaptModel(rows[0]);
+
+    return await this.getIdFromTable("country", countryId);
   }
 
   public async add(data: IAddCountry): Promise<CountryModel | IErrorResponse> {
