@@ -1,7 +1,6 @@
 import IModel from "../common/IModel.interface";
 import * as mysql2 from "mysql2/promise";
 import IErrorResponse from "../common/IErrorResponse.interface";
-import { resolve } from "path/posix";
 export default abstract class BaseService<T extends IModel> {
   constructor(private dbConnection: mysql2.Connection) {}
 

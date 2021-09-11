@@ -1,8 +1,7 @@
 import * as express from "express";
-import CountryContreller from "./controller";
-import CountryService from "./service";
+import CountryContreller from "./country_controller";
+import CountryService from "./country_service";
 import IApplicationResources from "../../common/IApplicationResources.interface";
-import IRoutrer from "../../common/IRouter.interface";
 import IRouter from "../../common/IRouter.interface";
 
 export default class CountryRouter implements IRouter {
@@ -19,5 +18,6 @@ export default class CountryRouter implements IRouter {
     app.get("/country", countryController.getAll.bind(countryController));
     app.get("/country/:id", countryController.getById.bind(countryController));
     app.post("/country", countryController.add.bind(countryController));
+    app.put("/country/:id", countryController.edit.bind(countryController));
   }
 }

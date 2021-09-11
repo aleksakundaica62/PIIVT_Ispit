@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as cors from "cors";
 import Config from "./config/dev";
-import CountryRouter from "./components/country/rounter";
+import CountryRouter from "./components/country/country_rounter";
 import * as mysql2 from "mysql2/promise";
 import IApplicationResources from "./common/IApplicationResources.interface";
 import Router from "./router";

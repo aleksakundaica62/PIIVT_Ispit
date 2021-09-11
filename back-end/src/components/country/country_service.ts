@@ -1,8 +1,9 @@
-import CountryModel from "./model";
+import CountryModel from "./country_model";
 import * as mysql2 from "mysql2/promise";
 import IErrorResponse from "../../common/IErrorResponse.interface";
 import { IAddCountry } from "./dto/AddCountry";
 import BaseService from "../../services/BaseService";
+import { IEditCountry } from "./dto/EditCountry";
 
 class CountryService extends BaseService<CountryModel> {
   protected async adaptModel(row: any): Promise<CountryModel> {
@@ -19,18 +20,6 @@ class CountryService extends BaseService<CountryModel> {
   public async getById(
     countryId: number
   ): Promise<CountryModel | IErrorResponse | null> {
-    // const sql: string = "SELECT * FROM country WHERE country_id = ?;";
-    // const [rows, columns] = await this.db.execute(sql, [countryId]);
-
-    // if (!Array.isArray(rows)) {
-    //   return null;
-    // }
-    // if (rows.length === 0) {
-    //   return null;
-    // }
-
-    // return await this.adaptModel(rows[0]);
-
     return await this.getIdFromTable("country", countryId);
   }
 
@@ -45,6 +34,33 @@ class CountryService extends BaseService<CountryModel> {
           const newCountryId: number = +info?.insertId;
 
           resolve(await this.getById(newCountryId));
+        })
+        .catch((error) => {
+          resolve({
+            errorCode: error?.errno,
+            errorMessage: error?.sqlMessage,
+          });
+        });
+    });
+  }
+  public async edit(
+    countryId: number,
+    data: IEditCountry
+  ): Promise<CountryModel | IErrorResponse | null> {
+    const result = await this.getById(countryId);
+
+    if (result === null) {
+      return null;
+    }
+    if (!(result instanceof CountryModel)) {
+      return result;
+    }
+    return new Promise<CountryModel | IErrorResponse>(async (resolve) => {
+      const sql = "UPDATE country SET name = ? WHERE country_id = ?";
+      this.db
+        .execute(sql, [data.name, countryId])
+        .then(async (result) => {
+          resolve(await this.getById(countryId));
         })
         .catch((error) => {
           resolve({
