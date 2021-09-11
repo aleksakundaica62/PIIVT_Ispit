@@ -26,6 +26,10 @@ const countryController: CountryContreller = new CountryContreller(
 );
 
 application.get("/country", countryController.getAll.bind(countryController));
+application.get(
+  "/country/:id",
+  countryController.getById.bind(countryController)
+);
 
 application.use((req, res) => {
   res.sendStatus(404);
