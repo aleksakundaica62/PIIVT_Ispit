@@ -4,23 +4,35 @@ import IErrorResponse from "../../common/IErrorResponse.interface";
 import { IAddCountry } from "./dto/AddCountry";
 import BaseService from "../../services/BaseService";
 import { IEditCountry } from "./dto/EditCountry";
+import IModelAdapterOptions from "../../common/IModelAdapterOptions.interface";
 
+class CountryModelAdapterOptions {
+  loadCities: boolean = false;
+}
 class CountryService extends BaseService<CountryModel> {
-  protected async adaptModel(row: any): Promise<CountryModel> {
+  protected async adaptModel(
+    row: any,
+    options: Partial<CountryModelAdapterOptions> = {}
+  ): Promise<CountryModel> {
     const item: CountryModel = new CountryModel();
 
-    item.country_id = +row?.country_id;
+    item.countryId = +row?.country_id;
     item.name = row?.name;
-
+    item.cities = await this.services.cityService.getAllByCountryId(
+      item.countryId
+    );
     return item;
   }
-  public async getAll(): Promise<CountryModel[] | IErrorResponse> {
-    return await this.getAllFromTable("country");
+  public async getAll(
+    options: Partial<CountryModelAdapterOptions> = {}
+  ): Promise<CountryModel[] | IErrorResponse> {
+    return await this.getAllFromTable("country", options);
   }
   public async getById(
-    countryId: number
+    countryId: number,
+    options: Partial<CountryModelAdapterOptions> = {}
   ): Promise<CountryModel | IErrorResponse | null> {
-    return await this.getIdFromTable("country", countryId);
+    return await this.getIdFromTable("country", countryId, options);
   }
 
   public async add(data: IAddCountry): Promise<CountryModel | IErrorResponse> {
@@ -61,6 +73,36 @@ class CountryService extends BaseService<CountryModel> {
         .execute(sql, [data.name, countryId])
         .then(async (result) => {
           resolve(await this.getById(countryId));
+        })
+        .catch((error) => {
+          resolve({
+            errorCode: error?.errno,
+            errorMessage: error?.sqlMessage,
+          });
+        });
+    });
+  }
+  public async delete(countryId: number): Promise<IErrorResponse> {
+    return new Promise<IErrorResponse>((resolve) => {
+      const sql = "DELETE FROM country WHERE country_id = ?;";
+      this.db
+        .execute(sql, [countryId])
+        .then(async (result) => {
+          const deleteInfo: any = result[0];
+          const deletedRows: number = +deleteInfo?.affectedRows;
+          console.log(result);
+
+          if (deletedRows === 1) {
+            resolve({
+              errorCode: 0,
+              errorMessage: "Country deleted",
+            });
+          } else {
+            resolve({
+              errorCode: -1,
+              errorMessage: "Could not be deleted.",
+            });
+          }
         })
         .catch((error) => {
           resolve({

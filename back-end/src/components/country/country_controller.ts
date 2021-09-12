@@ -1,15 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { IAddCountry, IAddCountryValidator } from "./dto/AddCountry";
 import CountryModel from "./country_model";
-import CountryService from "./country_service";
 import IErrorResponse from "../../common/IErrorResponse.interface";
 import { IEditCountry, IEditCountryValidator } from "./dto/EditCountry";
+import BaseController from "../../common/BaseController";
 
-class CountryContreller {
-  constructor(private countryService: CountryService) {}
-
+class CountryContreller extends BaseController {
   async getAll(req: Request, res: Response, next: NextFunction) {
-    const countries = await this.countryService.getAll();
+    const countries = await this.services.countryService.getAll();
 
     res.send(countries);
   }
@@ -22,14 +20,20 @@ class CountryContreller {
       res.sendStatus(400);
     }
     const country: CountryModel | null | IErrorResponse =
-      await this.countryService.getById(countryId);
+      await this.services.countryService.getById(countryId, {
+        loadCities: true,
+      });
 
     if (country === null) {
       res.sendStatus(404);
       return;
     }
+    if (country instanceof CountryModel) {
+      res.send(country);
+      return;
+    }
 
-    res.send(country);
+    res.status(500).send(country);
   }
 
   async add(req: Request, res: Response, next: NextFunction) {
@@ -40,7 +44,7 @@ class CountryContreller {
       return;
     }
 
-    const result = await this.countryService.add(data as IAddCountry);
+    const result = await this.services.countryService.add(data as IAddCountry);
     res.send(result);
   }
 
@@ -57,7 +61,7 @@ class CountryContreller {
       res.status(404).send(IEditCountryValidator.errors);
       return;
     }
-    const result = await this.countryService.edit(
+    const result = await this.services.countryService.edit(
       countryId,
       data as IEditCountry
     );
@@ -67,6 +71,16 @@ class CountryContreller {
     }
 
     res.send(result);
+  }
+  async delete(req: Request, res: Response, next: NextFunction) {
+    let id: string = req.params.id;
+    let countryId: number = +id;
+
+    if (countryId <= 0) {
+      res.sendStatus(400);
+      return;
+    }
+    res.send(await this.services.countryService.delete(countryId));
   }
 }
 

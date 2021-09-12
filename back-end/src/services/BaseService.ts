@@ -1,17 +1,27 @@
 import IModel from "../common/IModel.interface";
 import * as mysql2 from "mysql2/promise";
 import IErrorResponse from "../common/IErrorResponse.interface";
+import IModelAdapterOptions from "../common/IModelAdapterOptions.interface";
+import IApplicationResources from "../common/IApplicationResources.interface";
+import IServices from "../common/IServices.interface";
 export default abstract class BaseService<T extends IModel> {
-  constructor(private dbConnection: mysql2.Connection) {}
+  constructor(private resources: IApplicationResources) {}
 
   protected get db(): mysql2.Connection {
-    return this.dbConnection;
+    return this.resources.databaseConnection;
+  }
+  protected get services(): IServices {
+    return this.resources.services;
   }
 
-  protected abstract adaptModel(data: any): Promise<T>;
+  protected abstract adaptModel(
+    data: any,
+    options: Partial<IModelAdapterOptions>
+  ): Promise<T>;
 
   protected async getAllFromTable(
-    tableName: string
+    tableName: string,
+    options: Partial<IModelAdapterOptions>
   ): Promise<T[] | IErrorResponse> {
     return new Promise<T[] | IErrorResponse>(async (resolve) => {
       const sql: string = `SELECT * FROM ${tableName};`;
@@ -23,7 +33,7 @@ export default abstract class BaseService<T extends IModel> {
 
           if (Array.isArray(rows)) {
             for (let row of rows) {
-              lista.push(await this.adaptModel(row));
+              lista.push(await this.adaptModel(row, options));
             }
           }
           resolve(lista);
@@ -37,9 +47,10 @@ export default abstract class BaseService<T extends IModel> {
     });
   }
 
-  protected async getIdFromTable(
+  protected async getIdFromTable<AdapterOptions extends IModelAdapterOptions>(
     tableName: string,
-    id: number
+    id: number,
+    options: Partial<AdapterOptions> = {}
   ): Promise<T | IErrorResponse | null> {
     return new Promise<T | IErrorResponse | null>(async (resolve) => {
       const sql: string = `SELECT * FROM ${tableName} WHERE ${tableName}_id = ?;`;
@@ -57,7 +68,7 @@ export default abstract class BaseService<T extends IModel> {
             resolve(null);
             return;
           }
-          resolve(await this.adaptModel(rows[0]));
+          resolve(await this.adaptModel(rows[0], options));
         })
         .catch((error) => {
           resolve({
@@ -67,12 +78,15 @@ export default abstract class BaseService<T extends IModel> {
         });
     });
   }
-  protected async getAllByFieldNameFromTable(
+  protected async getAllByFieldNameFromTable<
+    AdapterOptions extends IModelAdapterOptions
+  >(
     tableName: string,
     fieldName: string,
-    fieldValue: any
-  ): Promise<T[] | IErrorResponse> {
-    return new Promise<T[] | IErrorResponse>(async (resolve) => {
+    fieldValue: any,
+    options: Partial<AdapterOptions> = {}
+  ): Promise<T[]> {
+    return new Promise<T[]>(async (resolve) => {
       const sql: string = `SELECT * FROM ${tableName} WHERE ${fieldName} = ?;`;
       this.db
         .execute(sql, [fieldValue])
@@ -82,16 +96,15 @@ export default abstract class BaseService<T extends IModel> {
 
           if (Array.isArray(rows)) {
             for (let row of rows) {
-              lista.push(await this.adaptModel(row));
+              lista.push(await this.adaptModel(row, options));
             }
           }
           resolve(lista);
         })
         .catch((error) => {
-          resolve({
-            errorCode: error?.errno,
-            errorMessage: error?.sqlMessage,
-          });
+          console.log(error.message);
+
+          resolve(error.message);
         });
     });
   }

@@ -1,10 +1,13 @@
 import * as express from "express";
 import * as cors from "cors";
 import Config from "./config/dev";
-import CountryRouter from "./components/country/country_rounter";
+import CountryRouter from "./components/country/country_router";
 import * as mysql2 from "mysql2/promise";
 import IApplicationResources from "./common/IApplicationResources.interface";
 import Router from "./router";
+import CityRouter from "./components/city/city_router";
+import CountryService from "./components/country/country_service";
+import CityService from "./components/city/city_service";
 
 async function main() {
   const application: express.Application = express();
@@ -12,20 +15,26 @@ async function main() {
   application.use(cors());
   application.use(express.json());
 
+  const db = await mysql2.createConnection({
+    host: Config.database.host,
+    port: Config.database.port,
+    user: Config.database.user,
+    password: Config.database.password,
+    database: Config.database.database,
+    charset: Config.database.charset,
+    timezone: Config.database.timezone,
+  });
+
   const resources: IApplicationResources = {
-    databaseConnection: await mysql2.createConnection({
-      host: Config.database.host,
-      port: Config.database.port,
-      user: Config.database.user,
-      password: Config.database.password,
-      database: Config.database.database,
-      charset: Config.database.charset,
-      timezone: Config.database.timezone,
-    }),
+    databaseConnection: db,
   };
 
   resources.databaseConnection.connect();
 
+  resources.services = {
+    countryService: new CountryService(resources),
+    cityService: new CityService(resources),
+  };
   application.use(
     Config.server.static.route,
     express.static(Config.server.static.path, {
@@ -37,7 +46,10 @@ async function main() {
     })
   );
 
-  Router.setupRoutes(application, resources, [new CountryRouter()]);
+  Router.setupRoutes(application, resources, [
+    new CountryRouter(),
+    new CityRouter(),
+  ]);
 
   application.use((req, res) => {
     res.sendStatus(404);
