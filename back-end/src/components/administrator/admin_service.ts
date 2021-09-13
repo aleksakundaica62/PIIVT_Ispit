@@ -82,6 +82,21 @@ class AdminService extends BaseService<AdminModel> {
         });
     });
   }
+
+  public async getByUsername(username: string): Promise<AdminModel> | null {
+    const admins = await this.getAllByFieldNameFromTable(
+      "administrator",
+      "username",
+      username,
+      {}
+    );
+
+    if (!Array.isArray(admins) || admins.length === 0) {
+      return null;
+    }
+
+    return admins[0];
+  }
 }
 
 export default AdminService;

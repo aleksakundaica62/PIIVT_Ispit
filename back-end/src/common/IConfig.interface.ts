@@ -1,3 +1,5 @@
+import { Algorithm } from "jsonwebtoken";
+
 export default interface IConfig {
   server: {
     port: number;
@@ -19,5 +21,21 @@ export default interface IConfig {
     database: string;
     charset: string;
     timezone: string;
+  };
+  auth: {
+    admin: {
+      auth: {
+        private: string;
+        public: string;
+        duration: number;
+      };
+      refresh: {
+        private: string;
+        public: string;
+        duration: number;
+      };
+      issuer: string;
+      algorthm: Algorithm;
+    };
   };
 }

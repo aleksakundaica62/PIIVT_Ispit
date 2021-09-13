@@ -12,6 +12,7 @@ import TemperatureRouter from "./components/temperature/temperature_router";
 import TemperatureService from "./components/temperature/temperature_service";
 import AdminService from "./components/administrator/admin_service";
 import AdminRouter from "./components/administrator/admin_router";
+import AuthRouter from "./components/auth/auth_routrer";
 
 async function main() {
   const application: express.Application = express();
@@ -57,6 +58,7 @@ async function main() {
     new CityRouter(),
     new TemperatureRouter(),
     new AdminRouter(),
+    new AuthRouter(),
   ]);
 
   application.use((req, res) => {
