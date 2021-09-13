@@ -8,6 +8,8 @@ import Router from "./router";
 import CityRouter from "./components/city/city_router";
 import CountryService from "./components/country/country_service";
 import CityService from "./components/city/city_service";
+import TemperatureRouter from "./components/temperature/temperature_router";
+import TemperatureService from "./components/temperature/temperature_service";
 
 async function main() {
   const application: express.Application = express();
@@ -34,6 +36,7 @@ async function main() {
   resources.services = {
     countryService: new CountryService(resources),
     cityService: new CityService(resources),
+    tempService: new TemperatureService(resources),
   };
   application.use(
     Config.server.static.route,
@@ -49,6 +52,7 @@ async function main() {
   Router.setupRoutes(application, resources, [
     new CountryRouter(),
     new CityRouter(),
+    new TemperatureRouter(),
   ]);
 
   application.use((req, res) => {

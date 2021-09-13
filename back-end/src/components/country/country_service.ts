@@ -5,6 +5,7 @@ import { IAddCountry } from "./dto/AddCountry";
 import BaseService from "../../services/BaseService";
 import { IEditCountry } from "./dto/EditCountry";
 import IModelAdapterOptions from "../../common/IModelAdapterOptions.interface";
+import CityModel from "../city/city_model";
 
 class CountryModelAdapterOptions {
   loadCities: boolean = false;
@@ -18,9 +19,16 @@ class CountryService extends BaseService<CountryModel> {
 
     item.countryId = +row?.country_id;
     item.name = row?.name;
-    item.cities = await this.services.cityService.getAllByCountryId(
-      item.countryId
-    );
+
+    if (options.loadCities) {
+      const result = await this.services.cityService.getAllByCountryId(
+        item.countryId
+      );
+      if (Array.isArray(result)) {
+        item.cities = result;
+      }
+    }
+
     return item;
   }
   public async getAll(

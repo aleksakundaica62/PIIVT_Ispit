@@ -39,8 +39,8 @@ class CityService extends BaseService<CityModel> {
 
   public async getAllByCountryId(
     countryId: number,
-    options: Partial<CityModelOptions> = {}
-  ): Promise<CityModel[]> {
+    options: Partial<CityModelOptions | IErrorResponse> = {}
+  ): Promise<CityModel[] | IErrorResponse> {
     return await this.getAllByFieldNameFromTable(
       "city",
       "country_id",

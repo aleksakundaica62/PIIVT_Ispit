@@ -9,8 +9,6 @@ class CityController extends BaseController {
     let id: string = req.params.id;
     let cityId: number = +id;
 
-    console.log(id);
-
     if (cityId <= 0) {
       res.sendStatus(400);
       return;
@@ -26,6 +24,7 @@ class CityController extends BaseController {
 
     if (result instanceof CityModel) {
       res.send(result);
+      console.log(result);
       return;
     }
 

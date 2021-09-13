@@ -9,13 +9,13 @@ export default class TemperatureRouter implements IRouter {
     app: express.Application,
     resources: IApplicationResources
   ) {
-    const tempService: TemperatureService = new TemperatureService(
-      resources.databaseConnection
-    );
     const tempController: TemperatureController = new TemperatureController(
-      tempService
+      resources
     );
 
-    app.get("/temperature/:id", tempController.getById.bind(tempController));
+    app.get("/tempetature/:id", tempController.getById.bind(tempController));
+    app.post("/tempetature", tempController.add.bind(tempController));
+    app.put("/tempetature/:id", tempController.edit.bind(tempController));
+    app.delete("/tempetature/:id", tempController.delete.bind(tempController));
   }
 }

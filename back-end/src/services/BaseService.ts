@@ -85,9 +85,11 @@ export default abstract class BaseService<T extends IModel> {
     fieldName: string,
     fieldValue: any,
     options: Partial<AdapterOptions> = {}
-  ): Promise<T[]> {
-    return new Promise<T[]>(async (resolve) => {
+  ): Promise<T[] | IErrorResponse> {
+    return new Promise<T[] | IErrorResponse>(async (resolve) => {
       const sql: string = `SELECT * FROM ${tableName} WHERE ${fieldName} = ?;`;
+      console.log(sql);
+
       this.db
         .execute(sql, [fieldValue])
         .then(async (result) => {
@@ -103,8 +105,10 @@ export default abstract class BaseService<T extends IModel> {
         })
         .catch((error) => {
           console.log(error.message);
-
-          resolve(error.message);
+          resolve({
+            errorCode: error?.errno,
+            errorMessage: error?.sqlMessage,
+          });
         });
     });
   }

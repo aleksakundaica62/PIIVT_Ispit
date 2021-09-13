@@ -1,7 +1,7 @@
 import Ajv from "ajv";
 
 interface IAddTemperature {
-  time: Date;
+  temperature: number;
   overview: "hours" | "days" | "weeks";
   rainPercentige: number;
   windSpeed: number;
@@ -14,10 +14,8 @@ const ajv = new Ajv();
 const IAddTemperatureValidator = ajv.compile({
   type: "object",
   properties: {
-    name: {
-      type: "string",
-      minLength: 2,
-      maxLength: 64,
+    temperature: {
+      type: "integer",
     },
     cityId: {
       type: "integer",
@@ -34,20 +32,16 @@ const IAddTemperatureValidator = ajv.compile({
       type: "integer",
       minimum: 1,
     },
-    time: {
-      type: "timestamp",
-    },
     cloudLevel: {
       enum: ["1", "2", "3", "4"],
     },
   },
   required: [
-    "name",
+    "temperature",
     "cityId",
     "overview",
     "rainPercentige",
     "windSpeed",
-    "time",
     "cloudLevel",
   ],
   additionalProperties: false,
