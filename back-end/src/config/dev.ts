@@ -30,12 +30,12 @@ const Config: IConfig = {
       auth: {
         duration: 60 * 60 * 24 * 7,
         public: readFileSync("keystore/admin-auth.public", "utf-8"),
-        private: readFileSync("keystore/-admin.auth.private", "utf-8"),
+        private: readFileSync("keystore/admin-auth.private", "utf-8"),
       },
       refresh: {
         duration: 60 * 60 * 24 * 31,
         public: readFileSync("keystore/admin-auth.public", "utf-8"),
-        private: readFileSync("keystore/-admin.auth.private", "utf-8"),
+        private: readFileSync("keystore/admin-auth.private", "utf-8"),
       },
     },
   },

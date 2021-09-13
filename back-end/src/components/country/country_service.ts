@@ -20,14 +20,10 @@ class CountryService extends BaseService<CountryModel> {
     item.countryId = +row?.country_id;
     item.name = row?.name;
 
-    if (options.loadCities) {
-      const result = await this.services.cityService.getAllByCountryId(
-        item.countryId
-      );
-      if (Array.isArray(result)) {
-        item.cities = result;
-      }
-    }
+    const result = await this.services.cityService.getAllByCountryId(
+      item.countryId
+    );
+    item.cities = result as CityModel[];
 
     return item;
   }
