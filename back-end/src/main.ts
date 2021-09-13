@@ -10,6 +10,8 @@ import CountryService from "./components/country/country_service";
 import CityService from "./components/city/city_service";
 import TemperatureRouter from "./components/temperature/temperature_router";
 import TemperatureService from "./components/temperature/temperature_service";
+import AdminService from "./components/administrator/admin_service";
+import AdminRouter from "./components/administrator/admin_router";
 
 async function main() {
   const application: express.Application = express();
@@ -37,6 +39,7 @@ async function main() {
     countryService: new CountryService(resources),
     cityService: new CityService(resources),
     tempService: new TemperatureService(resources),
+    adminService: new AdminService(resources),
   };
   application.use(
     Config.server.static.route,
@@ -53,6 +56,7 @@ async function main() {
     new CountryRouter(),
     new CityRouter(),
     new TemperatureRouter(),
+    new AdminRouter(),
   ]);
 
   application.use((req, res) => {
